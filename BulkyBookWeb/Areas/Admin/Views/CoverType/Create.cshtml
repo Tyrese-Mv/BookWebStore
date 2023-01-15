@@ -1,0 +1,14 @@
+﻿@model CoverType
+
+<form method="post">
+    <div class="row pb-2">
+        <h2 class="text-primary">Create Cover Type</h2>
+        <hr />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control"/>
+    </div>
+    <button type="submit" class="btn btn-primary" style="width:150px" >Create</button>
+    <a asp-action="Index" asp-controller="CoverType" class="btn btn-secondary" style="width:150px">Back to list</a>
+</form>

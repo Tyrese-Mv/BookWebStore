@@ -1,0 +1,58 @@
+﻿@model IEnumerable<BulkyBook.Models.Category>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<div class="container p3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h1>Index</h1>
+        </div>
+        <div class="col-6 text-end">
+            <a class="btn btn-primary" asp-action="AddCategory"><i class="bi bi-plus-circle"></i>&nbsp;Create New</a>
+        </div>
+    </div>
+    <br /><br />
+
+    <table class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DisplayOrder)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedDateTime)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DisplayOrder)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedDateTime)
+            </td>
+            <td>
+                <a class="btn btn-success" asp-action="EditCategory" asp-route-id="@item.id"><i class="bi bi-pencil-square"></i> &nbsp;Edit</a> |
+                <a class="btn btn-info" asp-action="Details" asp-route-id="@item.id"><i class="bi bi-info-circle"></i> &nbsp;Details</a> |
+                <a class="btn btn-danger" asp-action="DeleteCategory" asp-route-id="@item.id"><i class="bi bi-x-circle-fill"></i> &nbsp;Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+</div>
+
+
+
+
