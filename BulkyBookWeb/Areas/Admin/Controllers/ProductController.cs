@@ -1,5 +1,6 @@
 ﻿using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
 using BulkyBookWeb.DataAccess;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -11,9 +12,11 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
     {
         
         private readonly IUnitOfWork db;
-        public ProductController(IUnitOfWork db)
+        private readonly IWebHostEnvironment webHostEnvironment;
+        public ProductController(IUnitOfWork db, IWebHostEnvironment webHostEnvironment)
         {
             this.db = db;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         public IActionResult Index()
@@ -26,45 +29,64 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Upsert(int? id)
         {
-            Product product = new();
-            IEnumerable<SelectListItem> CategoryList = db.Category.GetAll().Select(
-                u=>new SelectListItem
+            ProductVM productVM = new()
+            {
+                Product = new(),
+                CategoryList = db.Category.GetAll().Select(i => new SelectListItem
                 {
-                    Text=u.Name,
-                    Value=u.id.ToString()
-                }
-            );
-            IEnumerable<SelectListItem> CoveTypeList = db.CoverType.GetAll().Select(
-                u => new SelectListItem
+                    Text = i.Name,
+                    Value = i.id.ToString()
+                }),
+                CoverTypeList = db.CoverType.GetAll().Select(i => new SelectListItem
                 {
-                    Text = u.Name,
-                    Value = u.id.ToString()
-                }
-            );
+                    Text = i.Name,
+                    Value = i.id.ToString()
+                }),
+            };
+            
             if (id == null || id == 0)
             {
                 //create product
-                ViewBag.CategoryList=CategoryList;
-                return View(product);
+                //ViewBag.CategoryList=CategoryList;
+                //ViewData["CoverTypeList"] = CoverTypeList;
+                return View(productVM);
             }
             else
             {
                 //update product
-
-
+                productVM.Product = db.Product.GetFirstOrDefault(u => u.id == id);
+                return View(productVM);
             }
 
-            return View();
+            
         }
 
         //Post Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Upsert(CoverType coverType)
+        public IActionResult Upsert(ProductVM obj, IFormFile? file)
         {
-            db.CoverType.Update(coverType);
-            db.Save();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                string wwwRootPath = webHostEnvironment.WebRootPath;
+                if (file != null)
+                {
+                    string fileName=Guid.NewGuid().ToString();
+                    var uploads=Path.Combine(wwwRootPath, @"images\products");
+                    var extension = Path.GetExtension(file.FileName);
+
+                    using (var fileStreams = new FileStream(Path.Combine(uploads, fileName + extension), FileMode.Create))
+                    {
+                        file.CopyTo(fileStreams);
+                    }
+                    obj.Product.ImageUrl = @"\images\products\" + fileName + extension;
+                }
+                db.Product.Add(obj.Product);
+                db.Save();
+                return RedirectToAction("Index");
+            }
+            //db.CoverType.Update(coverType);
+            return View(obj);
         }
 
         //Get Delete
@@ -90,6 +112,15 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             db.Save();
             return RedirectToAction("Index");
         }
-
+        #region API CALLS
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var productList = db.Product.GetAll(includeProperties:"Category");
+            return Json(new { data = productList });
+        }
+        #endregion
     }
+
+
 }
