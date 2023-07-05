@@ -74,14 +74,28 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
                     string fileName=Guid.NewGuid().ToString();
                     var uploads=Path.Combine(wwwRootPath, @"images\products");
                     var extension = Path.GetExtension(file.FileName);
-
+                    if (obj.Product.ImageUrl != null)
+                    {
+                        var OldImg = Path.Combine(wwwRootPath, obj.Product.ImageUrl.TrimStart('\\'));
+                        if (System.IO.File.Exists(OldImg))
+                        {
+                            System.IO.File.Delete(OldImg);
+                        }
+                    }
                     using (var fileStreams = new FileStream(Path.Combine(uploads, fileName + extension), FileMode.Create))
                     {
                         file.CopyTo(fileStreams);
                     }
                     obj.Product.ImageUrl = @"\images\products\" + fileName + extension;
                 }
-                db.Product.Add(obj.Product);
+                if (obj.Product.id == 0)
+                {
+                    db.Product.Add(obj.Product);
+                }
+                else
+                {
+                    db.Product.Update(obj.Product);
+                }
                 db.Save();
                 return RedirectToAction("Index");
             }

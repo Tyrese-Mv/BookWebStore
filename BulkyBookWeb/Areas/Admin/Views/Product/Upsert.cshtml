@@ -2,11 +2,12 @@
 
 <form method="post" asp-action="Upsert" enctype="multipart/form-data">
     <input asp-for="Product.id" hidden/>
+    <input asp-for="Product.ImageUrl" hidden/>
     <div class="border p-3 mt-4 row">
         <div class="row pb-2">
         <h2 class="text-primary">@(Model.Product.id!=0?"Update":"Create") Product</h2>
         <hr />
-    </div>
+    
     <div class="mb-3">
         <label asp-for="Product.Title"></label>
         <input asp-for="Product.Title" class="form-control"/>
@@ -82,7 +83,7 @@
     </div>
    
     </div>
-    
+    </div>
 </form>
 @section Scripts{
     @{
